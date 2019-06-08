@@ -66,50 +66,62 @@ app.route("/articles")
 //Requests targeting specific articles
 
 
-  app.route("/articles/:articleTitle")
-    .get(function(req,res){
-      Article.findOne({title: req.params.articleTitle}, function(err, foundArticle){
-        if(!err){
-          res.send(foundArticle);
+app.route("/articles/:articleTitle")
+  .get(function (req, res) {
+    Article.findOne({
+      title: req.params.articleTitle
+    }, function (err, foundArticle) {
+      if (!err) {
+        res.send(foundArticle);
+      } else {
+        res.send("No articles matching that Article was found");
+      }
+    })
+  })
+
+  .put(function (req, res) {
+    Article.update({
+        title: req.params.articleTitle
+      }, {
+        title: req.body.title,
+        content: req.body.content
+      }, {
+        overwrite: true
+      },
+      function (err, foundArticle) {
+        if (!err) {
+          res.send("Update Successful");
         } else {
-          res.send("No articles matching that Article was found");
+          res.send("The update has failed")
         }
       })
-    })
+  })
 
-    .put(function(req,res){
-      Article.update(
-        {title: req.params.articleTitle},
-         {title: req.body.title, content: req.body.content},
-         {overwrite: true},
-         function(err, foundArticle){
-          if(!err){
-            res.send("Update Successful");
-          } else{ 
-            res.send("The update has failed")
-          }
-    })
-    })
+  .patch(function (req, res) {
+    Article.update({
+        title: req.params.articleTitle
+      }, {
+        $set: req.body
+      },
+      function (err, updatedArticle) {
+        if (!err) {
+          res.send(updatedArticle);
+        } else {
+          res.send("There was an error updating the program");
+        }
+      })
+  })
 
-    .patch(function(req,res){
-      Article.update(
-        {title: req.params.articleTitle}, 
-        {$set:req.body},
-        function(err, updatedArticle){
-          if(!err){
-            res.send(updatedArticle);
-          } else {
-            res.send("There was an error updating the program");
-          }
-        })
-    })
-
-    .deleteOne({title: body.params.articleTitle}, function(err){
-      if(err){
-        res.send(err);
-      } else {
-        res.send("You have deleted the specific aritcle.")
-      }
-    });;
-
+  .delete(function (req, res) {
+    Article.deleteOne({
+        title: req.params.articleTitle
+      },
+      function (err) {
+        if (!err) {
+          res.send("Specific article deleted successfully");
+        } else {
+          res.send(err);
+        }
+      });
+  });
 app.listen(3000, () => console.log(`App is now online and connected`))
