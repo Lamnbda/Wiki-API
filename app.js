@@ -26,7 +26,10 @@ let articleSchema = new mongoose.Schema({
 
 let Article = mongoose.model('Article', articleSchema);
 
-app.route("/articles").get(function (req, res) {
+//requests targeting specific articles.
+
+app.route("/articles")
+  .get(function (req, res) {
     Article.find(function (err, foundArticles) {
       if (!err) {
         res.send(foundArticles);
@@ -35,12 +38,12 @@ app.route("/articles").get(function (req, res) {
       }
     });
   })
+
   .post(function (req, res) {
     let newArticle = new Article({
       title: req.body.title,
       content: req.body.content
     })
-
     newArticle.save(function (err) {
       if (!err) {
         res.send("Successfully sent");
@@ -49,8 +52,8 @@ app.route("/articles").get(function (req, res) {
       }
     });
   })
-  .delete(function (req, res) {
 
+  .delete(function (req, res) {
     Article.deleteMany(function (err) {
       if (!err) {
         res.send("Successfully deleted all of the articles");
@@ -58,6 +61,55 @@ app.route("/articles").get(function (req, res) {
         res.send(err);
       }
     })
-  })
+  });
+
+//Requests targeting specific articles
+
+
+  app.route("/articles/:articleTitle")
+    .get(function(req,res){
+      Article.findOne({title: req.params.articleTitle}, function(err, foundArticle){
+        if(!err){
+          res.send(foundArticle);
+        } else {
+          res.send("No articles matching that Article was found");
+        }
+      })
+    })
+
+    .put(function(req,res){
+      Article.update(
+        {title: req.params.articleTitle},
+         {title: req.body.title, content: req.body.content},
+         {overwrite: true},
+         function(err, foundArticle){
+          if(!err){
+            res.send("Update Successful");
+          } else{ 
+            res.send("The update has failed")
+          }
+    })
+    })
+
+    .patch(function(req,res){
+      Article.update(
+        {title: req.params.articleTitle}, 
+        {$set:req.body},
+        function(err, updatedArticle){
+          if(!err){
+            res.send(updatedArticle);
+          } else {
+            res.send("There was an error updating the program");
+          }
+        })
+    })
+
+    .deleteOne({title: body.params.articleTitle}, function(err){
+      if(err){
+        res.send(err);
+      } else {
+        res.send("You have deleted the specific aritcle.")
+      }
+    });;
 
 app.listen(3000, () => console.log(`App is now online and connected`))
